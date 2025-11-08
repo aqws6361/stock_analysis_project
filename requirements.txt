@@ -1,0 +1,6 @@
+finmind
+pandas
+tqdm
+tabulate
+yfinance
+python-dotenv
