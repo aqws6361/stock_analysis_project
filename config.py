@@ -1,29 +1,35 @@
 import os
 from dotenv import load_dotenv
-import sys
 
-# 1. 載入 .env 檔案中的環境變數
+# 讀取 .env 檔案中的環境變數
 load_dotenv()
 
-# 2. 讀取 FinMind API Token
+# --- FinMind API 金鑰 ---
 FINMIND_API_TOKEN = os.getenv("FINMIND_API_TOKEN")
 
-if not FINMIND_API_TOKEN:
-    print("  [錯誤] 找不到 FINMIND_API_TOKEN。", file=sys.stderr)
-    print("  請確認您已經建立了 .env 檔案，並在其中加入了 FINMIND_API_TOKEN=\"您的Token\"。", file=sys.stderr)
-    sys.exit(1) # 程式中斷
+# --- [優化 3] 葛拉漢 (Graham) 估值法 ---
+# 我們不再使用固定的 PE_MAX 和 PB_MAX
+# PE_MAX = 15       # (已停用)
+# PB_MAX = 1.5      # (已停用)
 
-# --- 設定篩選條件 (巴菲特指標) ---
-PE_MAX = 15       # 本益比低於 15
-PB_MAX = 1.5      # 股價淨值比低於 1.5
-ROE_MIN = 0.15    # 股東權益報酬率 (ROE) 高於 15% (即 0.15)
-
-# --- [優化 1] 新增「品質」篩選條件 ---
-DE_RATIO_MAX = 0.5      # 負債權益比 (Debt/Equity) 低於 0.5 (50%)
-CURRENT_RATIO_MIN = 1.5 # 流動比率 (Current Ratio) 高於 1.5
-DIVIDEND_YIELD_MIN = 0.02 # 股息殖利率 (Dividend Yield) 高於 2% (0.02)
+# 我們改用「安全邊際」 (Margin of Safety)
+# 意思是，我們希望股價低於其內在價值的 70% (即 30% 的安全邊際)
+MARGIN_OF_SAFETY = 0.7
 # ------------------------------------
 
-# --- [優化 2] 新增「成長」篩選條件 (避免價值陷阱) ---
-REVENUE_GROWTH_MIN = 0.05 # (年/季)營收成長率高於 5% (0.05)
+
+# --- [保留] 體質、品質、成長篩選條件 ---
+
+# 1. 體質 (Profitability)
+ROE_MIN = 0.15    # 股東權益報酬率 (ROE) 高於 15% (即 0.15)
+# ------------------------------------
+
+# 2. 品質 (Quality) - [優化 1]
+DE_RATIO_MAX = 0.5       # 負債權益比低於 0.5 (50%)
+CURRENT_RATIO_MIN = 1.5  # 流動比率高於 1.5
+DIVIDEND_YIELD_MIN = 0.02 # 股息殖利率高於 2% (0.02)
+# ------------------------------------
+
+# 3. 成長 (Growth) - [優化 2]
+REVENUE_GROWTH_MIN = 0.05 # 年營收成長率高於 5% (0.05)
 # ------------------------------------
