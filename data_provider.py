@@ -2,7 +2,7 @@ import pandas as pd
 from FinMind.data import FinMindApi
 import yfinance as yf
 import sys
-import config  # 匯入我們的設定檔
+import config  # 匯入設定檔
 
 # --- 初始化 API 客戶端 ---
 try:
@@ -49,9 +49,6 @@ def get_stock_fundamentals(stock_id: str, stock_type: str) -> dict | None:
     """
     使用 yfinance 獲取單一股票的基本面資料 (P/E, P/B, ROE)。
     """
-    # Yahoo Finance 的 Ticker 格式:
-    # 上市 (twse) -> 2330.TW
-    # 上櫃 (tpex) -> 6488.TWO
     suffix = ".TW" if stock_type == 'twse' else ".TWO"
     ticker_id = f"{stock_id}{suffix}"
 
@@ -67,16 +64,23 @@ def get_stock_fundamentals(stock_id: str, stock_type: str) -> dict | None:
         # --- [優化 1] 獲取「品質」指標 ---
         de_ratio = info.get('debtToEquity')
         current_ratio = info.get('currentRatio')
-        dividend_yield = info.get('dividendYield')  # yfinance 提供的股息殖利率是小數 (e.g., 0.02)
+        dividend_yield = info.get('dividendYield')
+
+        # --- [優化 2] 獲取「成長」指標 ---
+        # yfinance 的 'revenueGrowth' 通常是 TTM (近12月) 或 Quarterly (季) 成長率
+        revenue_growth = info.get('revenueGrowth')
         # ----------------------------------------
 
         # [修改] 檢查所有指標是否存在
-        # 注意: 負債權益比 (de_ratio) 允許為 0 或 None (如果公司無負債)
-        if pe is None or pb is None or roe is None or current_ratio is None or dividend_yield is None:
+        if (
+                pe is None or pb is None or roe is None or
+                current_ratio is None or dividend_yield is None or
+                revenue_growth is None
+        ):
             return None  # 缺少任一關鍵指標，跳過
 
         # yfinance 的 debtToEquity 單位是 % (e.g., 50.0 代表 50%)
-        # 我們要把它轉換為小數 (50.0 -> 0.5) 才能和 config.DE_RATIO_MAX (0.5) 比較
+        # 要把它轉換為小數 (50.0 -> 0.5) 才能和 config.DE_RATIO_MAX (0.5) 比較
         # 如果 de_ratio 是 None (無負債)，我們視為 0.0
         de_ratio_float = (de_ratio / 100.0) if de_ratio is not None else 0.0
 
@@ -87,7 +91,8 @@ def get_stock_fundamentals(stock_id: str, stock_type: str) -> dict | None:
             '最新ROE': roe,
             '負債權益比': de_ratio_float,
             '流動比率': current_ratio,
-            '股息殖利率': dividend_yield
+            '股息殖利率': dividend_yield,
+            '營收成長率': revenue_growth
         }
 
     except Exception as e:

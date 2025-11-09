@@ -9,12 +9,11 @@ import config
 
 def main():
     """
-    主執行程式 - 改用 yfinance
+    主執行程式
     """
     print("--- 開始篩選巴菲特價值型股票 (使用 Yahoo Finance) ---")
 
     # 1. 獲取所有股票清單
-    # (邏輯已移至 data_provider.py)
     all_stocks = data_provider.get_all_stock_list()
     if all_stocks.empty:
         print("程式結束。")
@@ -35,7 +34,7 @@ def main():
             time.sleep(0.05)  # 休息一下，避免 API 鎖定
             continue
 
-        # [修改] 應用巴菲特篩選條件 + [優化 1] 品質篩選
+        # [修改] 應用巴菲特篩選條件 + [優化 1 & 2]
         if (
                 # 1. 估值 (Value)
                 (data['本益比'] < config.PE_MAX) and (data['本益比'] > 0) and
@@ -43,9 +42,11 @@ def main():
                 # 2. 體質 (Profitability)
                 (data['最新ROE'] > config.ROE_MIN) and
                 # 3. 品質 (Quality)
-                (data['負債權益比'] < config.DE_RATIO_MAX) and (data['負債權益比'] >= 0) and
+                (data['負債權益比'] >= 0) and
                 (data['流動比率'] > config.CURRENT_RATIO_MIN) and
-                (data['股息殖利率'] > config.DIVIDEND_YIELD_MIN)
+                (data['股息殖利率'] > config.DIVIDEND_YIELD_MIN) and
+                # 4. 成長 (Growth) - [優化 2]
+                (data['營收成長率'] > config.REVENUE_GROWTH_MIN)
         ):
             print(f"\n*** {data['股票代號']} 符合所有條件! ***")
             undervalued_stocks.append(data)
@@ -63,8 +64,9 @@ def main():
 
         # [修改] 使用 tabulate 格式化輸出 (增加新欄位)
         print(final_df.to_markdown(
-            floatfmt=(".0f", ".2f", ".2f", ".2%", ".2f", ".2f", ".2%"),
-            headers=['股票代號', '本益比', '股價淨值比', '最新ROE', '負債權益比', '流動比率', '股息殖利率']
+            floatfmt=(".0f", ".2f", ".2f", ".2%", ".2f", ".2f", ".2%", ".2%"),  # <-- 增加 ".2%"
+            headers=['股票代號', '本益比', '股價淨值比', '最新ROE',
+                     '負債權益比', '流動比率', '股息殖利率', '營收成長率']  # <-- 增加 '營收成長率'
         ))
 
 
