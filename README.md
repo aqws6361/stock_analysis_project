@@ -1,8 +1,8 @@
-台股價值投資篩選器 (Value Investing Screener)
+📈 台股價值投資篩選器 (Value Investing Screener)
 
 這是一個使用 Python、FinMind 和 Yahoo Finance (yfinance) 打造的後端分析專案，旨在找出符合巴菲特式價值投資原則的台股。系統結合了 Streamlit 前端介面，提供可視化的分析結果。
 
-專案架構
+🏗️ 專案架構
 
 本專案採用模組化結構，職責分明：
 
@@ -20,7 +20,7 @@ requirements.txt: 專案依賴的 Python 套件。
 
 .gitignore: 確保 .env (包含您的金鑰) 和其他緩存檔案不會被上傳到 GitHub。
 
-核心投資邏輯 (Investment Logic)
+💡 核心投資邏輯 (Investment Logic)
 
 本系統採用「葛拉漢 (Benjamin Graham)」價值投資邏輯，結合「巴菲特」的護城河概念。
 
@@ -30,14 +30,13 @@ requirements.txt: 專案依賴的 Python 套件。
 
 我們使用葛拉漢公式來計算理論價值：
 
-
-$$\text{內在價值} = \sqrt{22.5 \times \text{EPS} \times \text{BVPS}}$$
+內在價值 = √( 22.5 × EPS × BVPS )
 
 EPS (每股盈餘)：代表賺錢能力。
 
 BVPS (每股淨值)：代表擁有的資產。
 
-22.5：葛拉漢經驗係數。
+22.5：葛拉漢經驗係數 (給予 15 倍本益比 x 1.5 倍股價淨值比)。
 
 2. 目標買價 (Target Buy Price)
 
@@ -45,12 +44,11 @@ BVPS (每股淨值)：代表擁有的資產。
 
 為了對抗未知風險，我們設定了 安全邊際 (Margin of Safety)（預設 30%）：
 
-
-$$\text{目標買價} = \text{內在價值} \times 0.7$$
+目標買價 = 內在價值 × 0.7
 
 3. 決策視覺化
 
-系統會在全台股中尋找符合以下情境的標的：
+系統會在全台股中尋找符合以下情境的標的（請見下方結構圖）：
 
 💰 內在價值 (Intrinsic Value)  --> $100 元 (理論價值)
       |
@@ -63,7 +61,7 @@ $$\text{目標買價} = \text{內在價值} \times 0.7$$
 📉 目前股價 (Current Price)    --> $50 元  (市場報價 - 超值！)
 
 
-快速開始 (Quick Start)
+🚀 快速開始 (Quick Start)
 
 1. 環境設定
 
